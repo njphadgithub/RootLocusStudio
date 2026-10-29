@@ -198,7 +198,7 @@ const it0=(tr,sim)=>{const{T,Y,den,num}=sim,y=num[num.length-1]/den[den.length-1
 function say(m){if($('voice').checked&&window.speechSynthesis){speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(m);speechSynthesis.speak(u)}}
 function update(){const K=+$('k').value;$('glab').textContent='Gain K: '+f2(K);if(document.activeElement!==$('kn'))$('kn').value=f2(K);
  const cp=clp(K),uns=cp.some(z=>z[0]>1e-4),marg=!uns&&K>0&&cp.some(z=>Math.abs(z[0])<=1e-4&&Math.abs(z[1])>1e-6);
- if(uns&&S.last){S.last=false;say('Warning! System has switched from stable to unstable at gain K equals '+f2(K)+'. Closed loop poles have crossed into the right half plane, resulting in exponential growth.')}
+ if(uns&&S.last){S.last=false;say('Warning! System has switched from stable to unstable at gain K equals '+f2(K)+'. Closed loop poles have crossed into the right half plane, resulting in exponential growth.')} 
  else if(!uns&&!S.last){S.last=true;say('System has switched from unstable back to stable at gain K equals '+f2(K)+'. All poles are in the left half plane.')}
  const st=$('stat');st.textContent=uns?'🔴 UNSTABLE (poles in RHP)':marg?'🟠 MARGINALLY STABLE (poles on jω axis)':'🟢 STABLE (all poles in LHP)';st.style.color=uns?css('--bad'):marg?'#e08600':css('--ok');
  $('pz').innerHTML='<b>Closed-loop poles (n='+cp.length+'):</b> '+cp.map(cs).join(', ')+'<br><b>Zeros (m='+S.z.length+'):</b> '+(S.z.length?S.z.map(cs).join(', '):'none');
