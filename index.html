@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><title>Root Locus Studio</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>
+:root{--bg:#f3f5f8;--card:#fff;--tx:#1b2430;--mu:#5b6675;--ac:#0b4f8a;--bd:#cfd6df;--ok:#0a7a3d;--bad:#c62828;--in:#eef2f7;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#10151c;--card:#19212b;--tx:#e6ebf1;--mu:#9aa6b5;--ac:#6db3f2;--bd:#2e3947;--ok:#4cd07f;--bad:#ff6b6b;--in:#222c38;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#10151c;--card:#19212b;--tx:#e6ebf1;--mu:#9aa6b5;--ac:#6db3f2;--bd:#2e3947;--ok:#4cd07f;--bad:#ff6b6b;--in:#222c38;color-scheme:dark}
+*{box-sizing:border-box}html,body{margin:0}body{background:var(--bg);color:var(--tx);font:14px/1.45 system-ui,Arial,sans-serif}
+header{background:var(--ac);color:#fff;padding:10px 16px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between}
+header h1{font-size:18px;margin:0}header small{opacity:.85}
+main{display:grid;grid-template-columns:300px minmax(0,1fr) minmax(0,1fr);gap:10px;padding:10px}
+@media(max-width:1100px){main{grid-template-columns:1fr 1fr}.theory{grid-column:1/-1}}@media(max-width:700px){main{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:10px;min-width:0}
+.card h2{font-size:14px;margin:0 0 6px;color:var(--ac);text-align:center;text-transform:uppercase;letter-spacing:.04em}
+.theory{font-size:12px;max-height:calc(100vh - 80px);overflow:auto}.theory h3{font-size:12.5px;color:var(--bad);margin:8px 0 2px}
+.box{background:var(--in);border-left:3px solid var(--ac);padding:4px 7px;margin:4px 0;border-radius:3px}
+input,select,button{font:inherit;color:var(--tx);background:var(--in);border:1px solid var(--bd);border-radius:5px;padding:5px 8px}
+button{cursor:pointer;font-weight:600}button:hover{border-color:var(--ac)}button.p{background:var(--ac);color:#fff;border-color:var(--ac)}
+.row{display:flex;gap:6px;align-items:center;margin:5px 0;flex-wrap:wrap}.row>input[type=text]{flex:1;min-width:120px}
+#tf{font-family:"Times New Roman",serif;font-size:16px;font-weight:700;text-align:center;width:100%}
+canvas{width:100%;display:block;border:1px solid var(--bd);border-radius:6px;background:var(--card)}
+#loc{height:430px;cursor:crosshair}#stp{height:300px}
+.st{font-weight:700;font-size:16px;text-align:center;padding:8px;border-radius:6px;background:var(--in);margin-bottom:6px}
+.m{margin:3px 0;font-size:13px}.m b{color:var(--ac)}.big{font-size:15px;font-weight:700}
+input[type=range]{flex:1;padding:0;accent-color:var(--ac)}
+table{border-collapse:collapse;width:100%;font-size:12px}td,th{border:1px solid var(--bd);padding:3px 5px;text-align:center}th{background:var(--ac);color:#fff}
+.legend{font-size:11.5px;color:var(--mu);text-align:center;margin-bottom:4px}
+#rep{position:fixed;inset:0;background:var(--bg);overflow:auto;padding:16px;display:none;z-index:9}#rep.on{display:block}
+#rep img{max-width:48%;border:1px solid var(--bd)}#rep .q{margin:6px 0}#rep .q input{width:100%}
+@media print{main,header,#tools{display:none!important}#rep{position:static;display:block}.np{display:none}}
+</style></head><body>
+<header><div><h1>Root Locus Studio</h1><small>Interactive root locus · step response · stability analysis</small></div>
+<div id="tools" class="row"><label><input type="checkbox" id="voice"> Voice alerts</label><button id="theme">◐ Theme</button></div></header>
+<main>
+<section class="card theory" id="theory">
+<h2>Root Locus Theory &amp; Guide</h2>
+<h3>1. Definition &amp; purpose</h3>The root locus shows how closed-loop poles move as gain K changes. Used for stability checks, gain selection, speed/overshoot trade-offs and design.
+<div class="box">Characteristic equation: 1 + K·G(s) = 0</div>
+<h3>2. Basic rules</h3>• Starts at poles (×) when K = 0<br>• Ends at zeros (○) as K → ∞; the other n−m branches go to ∞ along asymptotes<br>• Symmetric about the real axis<br>• Real-axis locus lies left of an odd number of poles+zeros<br>• Red dots = closed-loop poles at current K<br>• Yellow square = asymptote centroid; green diamonds = breakaway points; orange rings = jω crossings
+<h3>3. jω instability</h3><div class="box" style="border-color:var(--bad)">Poles on the jω axis give marginal stability (sustained oscillation). Poles in the RHP give exponentially growing oscillation.</div>
+<h3>4. Transient performance</h3><div class="box">ζ sets overshoot, ωₙ sets speed. Poles further left → shorter settling time; poles near the jω axis → larger overshoot.</div>
+<h3>5. Time-domain metrics</h3>t<sub>r</sub> 10–90 % rise · t<sub>p</sub> peak time · M<sub>p</sub> overshoot · t<sub>s</sub> ±2 % settling time.
+<h3>6. Procedure</h3>1. Pick a preset or type any G(s) (e.g. <i>10*(s+2)/(s^3+6*s^2+5*s)</i> or <i>[1]/[1 6 8 0]</i>).<br>2. Press <b>Update Plot</b>.<br>3. Drag the K slider (or click/drag on the locus) and watch the red poles.<br>4. Log observations and generate the report.
+<h3>7. Computed analysis</h3><div id="calc" class="box"></div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:10px;min-width:0">
+<div class="card"><h2>Control Panel</h2>
+<div class="row"><select id="pre" style="flex:1"></select></div>
+<div class="row"><b>G(s) =</b><input type="text" id="tf" value="1 / (s^3 + 6*s^2 + 8*s)"></div>
+<div id="tfd" class="big" style="text-align:center;margin:4px 0"></div>
+<div class="row"><span>Num</span><input type="text" id="num" readonly size="10"><span>Den</span><input type="text" id="den" readonly size="14"></div>
+<div class="row"><b id="glab">Gain K: 0</b><input type="range" id="k" min="0" max="100" step="0.01" value="0"><input type="number" id="kn" step="0.1" style="width:80px"></div>
+<div class="row"><button class="p" id="upd">Update Plot</button><button id="rst">Reset</button><button id="play">▶ Sweep K</button><button id="log">＋ Log point</button><button id="rep-b">Generate Report</button></div>
+<div id="err" style="color:var(--bad);font-weight:600"></div></div>
+<div class="card"><h2>Root Locus &amp; Migration Paths</h2><div class="legend">✕ open-loop poles · ○ zeros · 🔴 closed-loop · 🟨 centroid · ◆ breakaway · dashed = asymptotes · click/drag/scroll on plot</div><canvas id="loc"></canvas></div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:10px;min-width:0">
+<div class="card"><h2>Metrics</h2><div id="stat" class="st">Status</div>
+<div class="m" id="pz"></div><div class="m" id="asy"></div><div class="m big" id="zeta"></div><div class="m big" id="wn"></div></div>
+<div class="card"><h2 id="rtitle">Closed-Loop Step Response</h2><canvas id="stp"></canvas></div>
+<div class="card"><h2>Observation Log</h2><table id="tbl"><tr><th>#</th><th>K</th><th>Status</th><th>ζ</th><th>M<sub>p</sub></th><th>t<sub>s</sub></th></tr></table></div>
+</section></main>
+<div id="rep"></div>
+<script>
+const $=id=>document.getElementById(id);
+/* ---------- polynomial / rational helpers (coefficients high→low) ---------- */
+const trim=p=>{let i=0;while(i<p.length-1&&Math.abs(p[i])<1e-14)i++;return p.slice(i)};
+const padd=(a,b)=>{const n=Math.max(a.length,b.length),r=Array(n).fill(0);a.forEach((c,i)=>r[n-a.length+i]+=c);b.forEach((c,i)=>r[n-b.length+i]+=c);return trim(r)};
+const psc=(a,k)=>a.map(c=>c*k);
+const pmul=(a,b)=>{const r=Array(a.length+b.length-1).fill(0);a.forEach((x,i)=>b.forEach((y,j)=>r[i+j]+=x*y));return trim(r)};
+const pder=p=>p.length<2?[0]:p.slice(0,-1).map((c,i)=>c*(p.length-1-i));
+const cm=(a,b)=>[a[0]*b[0]-a[1]*b[1],a[0]*b[1]+a[1]*b[0]];
+const cd=(a,b)=>{const d=b[0]*b[0]+b[1]*b[1];return[(a[0]*b[0]+a[1]*b[1])/d,(a[1]*b[0]-a[0]*b[1])/d]};
+const pev=(p,z)=>{let r=[0,0];for(const c of p){r=cm(r,z);r[0]+=c}return r};
+function roots(p){p=trim(p);let nz=0;while(p.length>1&&Math.abs(p[p.length-1])<1e-12){p=p.slice(0,-1);nz++}
+ const n=p.length-1;let r=[];
+ if(n>0){const a=p.map(c=>c/p[0]),R=1+Math.max(...a.slice(1).map(Math.abs));
+  r=[...Array(n)].map((_,i)=>[R*.6*Math.cos(2*Math.PI*i/n+.4),R*.6*Math.sin(2*Math.PI*i/n+.4)]);
+  for(let it=0;it<400;it++){let md=0;for(let i=0;i<n;i++){let d=[1,0];for(let j=0;j<n;j++)if(j!=i)d=cm(d,[r[i][0]-r[j][0],r[i][1]-r[j][1]]);
+   const f=cd(pev(a,r[i]),d);r[i]=[r[i][0]-f[0],r[i][1]-f[1]];md=Math.max(md,Math.abs(f[0])+Math.abs(f[1]))}if(md<1e-14)break}}
+ r=r.map(z=>[Math.abs(z[0])<1e-7?0:z[0],Math.abs(z[1])<1e-6?0:z[1]]);for(let i=0;i<nz;i++)r.push([0,0]);return r}
+function parseTF(src){
+ let t=src.replace(/\[([^\]]*)\]/g,(m,x)=>'['+x.trim().split(/[\s,;]+/).join(',')+']').replace(/\s+/g,'').replace(/\*\*/g,'^');let i=0;
+ const R=(n,d=[1])=>({n,d}),add=(a,b)=>R(padd(pmul(a.n,b.d),pmul(b.n,a.d)),pmul(a.d,b.d)),neg=a=>R(psc(a.n,-1),a.d),mul=(a,b)=>R(pmul(a.n,b.n),pmul(a.d,b.d)),inv=a=>R(a.d,a.n);
+ function expr(){let v=term();while(t[i]=='+'||t[i]=='-'){const o=t[i++],w=term();v=add(v,o=='+'?w:neg(w))}return v}
+ function term(){let v=un();while(i<t.length){if(t[i]=='*'){i++;v=mul(v,un())}else if(t[i]=='/'){i++;v=mul(v,inv(un()))}else if(/[0-9.s(\[]/.test(t[i]))v=mul(v,un());else break}return v}
+ function un(){if(t[i]=='-'){i++;return neg(un())}if(t[i]=='+'){i++;return un()}return pw()}
+ function pw(){let b=at();if(t[i]=='^'){i++;let br=t[i]=='(';if(br)i++;const m=/^[+-]?\d+/.exec(t.slice(i));if(!m)throw Error('Exponent must be an integer');i+=m[0].length;if(br){if(t[i]!=')')throw Error('Missing )');i++}
+  let e=+m[0],base=e<0?inv(b):b,r=R([1]);for(let k=0;k<Math.abs(e);k++)r=mul(r,base);return r}return b}
+ function at(){const c=t[i];if(c=='('){i++;const v=expr();if(t[i++]!=')')throw Error('Missing )');return v}
+  if(c=='['){const j=t.indexOf(']',i),v=t.slice(i+1,j).split(',').map(Number);if(v.some(isNaN))throw Error('Bad vector');i=j+1;return R(trim(v))}
+  if(c=='s'){i++;return R([1,0])}const m=/^(\d+\.?\d*|\.\d+)(e[+-]?\d+)?/i.exec(t.slice(i));if(!m)throw Error('Unexpected "'+(c||'end')+'" in expression');i+=m[0].length;return R([+m[0]])}
+ const v=expr();if(i<t.length)throw Error('Unexpected "'+t[i]+'"');
+ let n=trim(v.n),d=trim(v.d);if(Math.abs(d[0])<1e-14)throw Error('Zero denominator');const g=d[0];n=psc(n,1/g);d=psc(d,1/g);
+ if(n.length>d.length)throw Error('Improper transfer function (deg num > deg den)');if(d.length<2)throw Error('Denominator must contain s');return{n,d}}
+/* ---------- state ---------- */
+const S={n:[1],d:[1,6,8,0],z:[],p:[],br:[],Ks:[],bk:[],cross:[],view:{zoom:1},last:true,log:[],info:null,sim:null};
+const PRE={'Preset 1: jω Instability [1 6 8 0]':'1 / (s^3 + 6*s^2 + 8*s)','Preset 2: Transient Overshoot [1 6 5 0]':'10 / (s^3 + 6*s^2 + 5*s)','Preset 3: With a zero':'(s+3)/(s*(s+1)*(s+5))','Preset 4: Complex poles (1/(s(s²+10s+40)))':'1/(s^3+10*s^2+40*s)'};
+for(const k in PRE){const o=document.createElement('option');o.textContent=k;$('pre').appendChild(o)}
+const f2=(x,d=2)=>(+x).toFixed(d).replace(/^-0\.?0*$/,'0');
+const cs=z=>Math.abs(z[1])<1e-9?f2(z[0]):f2(z[0])+(z[1]<0?'−':'+')+f2(Math.abs(z[1]))+'j';
+const clp=K=>roots(padd(S.d,psc(S.n,K)));
+const maxRe=K=>Math.max(...clp(K).map(z=>z[0]));
+function build(){ // parse + precompute locus
+ $('err').textContent='';
+ try{const r=parseTF($('tf').value);S.n=r.n;S.d=r.d}catch(e){$('err').textContent='Error: '+e.message;return false}
+ $('num').value=JSON.stringify(S.n.map(c=>+c.toPrecision(6))).replace(/,/g,' ');$('den').value=JSON.stringify(S.d.map(c=>+c.toPrecision(6))).replace(/,/g,' ');
+ S.z=roots(S.n);if(S.n.length==1)S.z=[];S.p=roots(S.d);
+ // jω crossings via sign change of max real part
+ const Kmax=2000,N=1500;let Ks=[];for(let i=0;i<=N;i++)Ks.push(Kmax*Math.pow(i/N,4));
+ S.cross=[];let prev=maxRe(0);
+ for(let i=1;i<=N;i++){const c=maxRe(Ks[i]);if(prev<=1e-6&&c>1e-6){let a=Ks[i-1],b=Ks[i];for(let j=0;j<50;j++){const m=(a+b)/2;maxRe(m)>1e-9?b=m:a=m}
+   const q=clp(b),w=Math.max(...q.map(z=>Math.abs(z[1])));S.cross.push({K:b,w});if(S.cross.length>2)break}prev=c}
+ const Kc=S.cross.length?S.cross[0].K:null,top=Kc?Math.max(50,Math.ceil(Kc*1.5)):100;
+ const kmax=Math.min(Math.max(top,10),1000);$('k').max=kmax;$('k').value=0;$('kn').value=0;
+ const KL=[];for(let i=0;i<=2500;i++)KL.push(Math.max(kmax*1.5,200)*Math.pow(i/2500,3));S.Ks=KL;
+ let prevR=roots(S.d),br=prevR.map(z=>[z]);
+ for(let i=1;i<KL.length;i++){let rem=clp(KL[i]).slice();const cur=[];
+  prevR.forEach(pz=>{let bi=0,bd=1e99;rem.forEach((z,j)=>{const d=Math.hypot(z[0]-pz[0],z[1]-pz[1]);if(d<bd){bd=d;bi=j}});cur.push(rem.splice(bi,1)[0])});
+  cur.forEach((z,j)=>br[j].push(z));prevR=cur}
+ S.br=br;
+ // breakaway points
+ const q=padd(pmul(S.n,pder(S.d)),psc(pmul(pder(S.n),S.d),-1));S.bk=[];
+ if(q.length>1)roots(q).filter(z=>Math.abs(z[1])<1e-5).forEach(z=>{const s=z[0],Nv=pev(S.n,[s,0])[0],Dv=pev(S.d,[s,0])[0];if(Math.abs(Nv)>1e-12){const K=-Dv/Nv;if(K>1e-9)S.bk.push({s,K})}});
+ // asymptotes & analysis text
+ const n=S.p.length,m=S.z.length,na=n-m;S.na=na;
+ S.cent=na>0?(S.p.reduce((a,z)=>a+z[0],0)-S.z.reduce((a,z)=>a+z[0],0))/na:0;
+ S.ang=[...Array(na)].map((_,k)=>(2*k+1)*180/na);
+ let h='';const ang=(a,b)=>Math.atan2(a[1]-b[1],a[0]-b[0])*180/Math.PI;
+ h+='Breakaway / break-in: '+(S.bk.length?S.bk.map(b=>'σ='+f2(b.s)+' (K='+f2(b.K)+')').join(', '):'none')+'<br>';
+ h+='jω crossings: '+(S.cross.length?S.cross.map(c=>'±j'+f2(c.w)+' at K='+f2(c.K)).join('; '):'none → stable for all K')+'<br>';
+ S.p.filter(z=>z[1]>1e-6).forEach(z=>{let s=180;S.z.forEach(w=>s+=ang(z,w));S.p.forEach(w=>{if(w!==z)s-=ang(z,w)});s=((s+180)%360+360)%360-180;h+='Departure angle at '+cs(z)+': '+f2(s,1)+'°<br>'});
+ h+=Kc?'Stable range: 0 &lt; K &lt; '+f2(Kc):'';$('calc').innerHTML=h;
+ let k=1;try{k=S.n[0]}catch(e){}
+ return true}
+/* ---------- canvas helpers ---------- */
+function fit(c){const r=c.getBoundingClientRect(),d=devicePixelRatio||1;c.width=r.width*d;c.height=r.height*d;const x=c.getContext('2d');x.setTransform(d,0,0,d,0,0);return[x,r.width,r.height]}
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const COL=['#0b6bcb','#e67e22','#8e44ad','#16a085','#c0392b','#7f8c8d','#2c3e50','#d35400'];
+function map(W,H){const all=[...S.p,...S.z];let ext=Math.max(...all.map(z=>Math.hypot(z[0],z[1])),...S.bk.map(b=>Math.abs(b.s)),...S.cross.map(c=>c.w),1);
+ const span=Math.max(6,ext*1.6)*S.view.zoom,sc=H/(2*span),cx=-span*.4;return{sc,sx:x=>W/2+(x-cx)*sc,sy:y=>H/2-y*sc,ix:px=>(px-W/2)/sc+cx,iy:py=>(H/2-py)/sc}}
+function drawLocus(){const c=$('loc'),[x,W,H]=fit(c),M=map(W,H),K=+$('k').value,tx=css('--tx'),mu=css('--mu');
+ x.clearRect(0,0,W,H);const x0=M.sx(0);x.fillStyle='rgba(60,180,90,.10)';x.fillRect(0,0,x0,H);x.fillStyle='rgba(220,60,60,.10)';x.fillRect(x0,0,W-x0,H);
+ // grid
+ const st=[1,2,5,10,20,50,100,200,500].find(s=>s*M.sc>38)||500;x.strokeStyle=css('--bd');x.lineWidth=.5;x.fillStyle=mu;x.font='10px sans-serif';
+ for(let v=Math.ceil(M.ix(0)/st)*st;v<=M.ix(W);v+=st){x.beginPath();x.moveTo(M.sx(v),0);x.lineTo(M.sx(v),H);x.stroke();x.fillText(f2(v,0),M.sx(v)+2,H-3)}
+ for(let v=Math.ceil(M.iy(H)/st)*st;v<=M.iy(0);v+=st){x.beginPath();x.moveTo(0,M.sy(v));x.lineTo(W,M.sy(v));x.stroke();x.fillText(f2(v,0),3,M.sy(v)-2)}
+ x.strokeStyle=css('--bad');x.setLineDash([6,4]);x.lineWidth=1.6;x.beginPath();x.moveTo(x0,0);x.lineTo(x0,H);x.stroke();x.setLineDash([]);
+ x.strokeStyle=tx;x.lineWidth=.8;x.beginPath();x.moveTo(0,M.sy(0));x.lineTo(W,M.sy(0));x.stroke();
+ x.fillStyle=css('--ok');x.font='bold 11px sans-serif';x.fillText('LHP (Stable)',8,16);x.fillStyle=css('--bad');x.fillText('RHP (Unstable)',Math.min(x0+8,W-90),16);
+ x.fillStyle=mu;x.fillText('Real axis (s⁻¹)',W-90,M.sy(0)-14);x.save();x.translate(12,H/2+30);x.rotate(-Math.PI/2);x.fillText('Imag axis (s⁻¹)',0,0);x.restore();
+ // asymptotes
+ if(S.na>0){x.strokeStyle=mu;x.setLineDash([5,4]);x.lineWidth=1;S.ang.forEach(a=>{const r=a*Math.PI/180;x.beginPath();x.moveTo(M.sx(S.cent),M.sy(0));x.lineTo(M.sx(S.cent)+Math.cos(r)*3000,M.sy(0)-Math.sin(r)*3000);x.stroke()});x.setLineDash([]);
+  x.fillStyle='#ffd400';x.strokeStyle='#000';x.fillRect(M.sx(S.cent)-5,M.sy(0)-5,10,10);x.strokeRect(M.sx(S.cent)-5,M.sy(0)-5,10,10)}
+ // branches
+ S.br.forEach((b,i)=>{x.strokeStyle=COL[i%COL.length];x.lineWidth=2;x.beginPath();b.forEach((z,j)=>j?x.lineTo(M.sx(z[0]),M.sy(z[1])):x.moveTo(M.sx(z[0]),M.sy(z[1])));x.stroke();
+  const j=Math.floor(b.length*.04),a=b[j],c2=b[j+1],px=M.sx(a[0]),py=M.sy(a[1]),th=Math.atan2(-(c2[1]-a[1]),c2[0]-a[0]);
+  if(Math.hypot(c2[0]-a[0],c2[1]-a[1])>1e-9){x.fillStyle=tx;x.save();x.translate(px,py);x.rotate(th);x.beginPath();x.moveTo(8,0);x.lineTo(-5,-5);x.lineTo(-5,5);x.fill();x.restore()}});
+ // markers
+ x.lineWidth=2.2;x.strokeStyle='#0b4f8a';S.p.forEach(z=>{const a=M.sx(z[0]),b=M.sy(z[1]);x.beginPath();x.moveTo(a-6,b-6);x.lineTo(a+6,b+6);x.moveTo(a+6,b-6);x.lineTo(a-6,b+6);x.stroke()});
+ S.z.forEach(z=>{x.beginPath();x.arc(M.sx(z[0]),M.sy(z[1]),6,0,7);x.stroke()});
+ x.fillStyle='#1abc9c';S.bk.forEach(b=>{const a=M.sx(b.s),y=M.sy(0);x.beginPath();x.moveTo(a,y-7);x.lineTo(a+7,y);x.lineTo(a,y+7);x.lineTo(a-7,y);x.fill()});
+ x.strokeStyle='#ff9800';S.cross.forEach(c=>[c.w,-c.w].forEach(w=>{x.beginPath();x.arc(M.sx(0),M.sy(w),7,0,7);x.stroke()}));
+ clp(K).forEach(z=>{x.fillStyle='#e53935';x.beginPath();x.arc(M.sx(z[0]),M.sy(z[1]),K==0?7:5.5,0,7);K==0?(x.strokeStyle='#e53935',x.lineWidth=1.5,x.stroke()):x.fill()});
+ S._M=M}
+/* ---------- step response ---------- */
+function simulate(K){const den=padd(S.d,psc(S.n,K)),num=psc(S.n,K),n=den.length-1,a=den.map(c=>c/den[0]),b=Array(a.length).fill(0);num.forEach((c,i)=>b[b.length-num.length+i]=c/den[0]);
+ const D=b[0];const cb=b.map((c,i)=>c-D*a[i]);// y=sum_{i=1..n} cb[i]*x_{n-i+1}... companion form
+ const pl=roots(den),sig=Math.min(...pl.map(z=>-z[0])),unst=pl.some(z=>z[0]>1e-4),wmax=Math.max(...pl.map(z=>Math.hypot(z[0],z[1])),1);
+ let tE=unst||sig<1e-3?10:Math.min(Math.max(7/sig,2),300);const dt=Math.min(tE/4000,.2/wmax),ns=Math.ceil(tE/dt);
+ let X=Array(n).fill(0);const f=(X)=>{const d=Array(n).fill(0);for(let i=0;i<n-1;i++)d[i]=X[i+1];let s=1;d[n-1]=1;for(let i=0;i<n;i++)d[n-1]-=a[n-i]*X[i];return d};
+ const T=[],Y=[],out=X=>{let y=D;for(let i=0;i<n;i++)y+=cb[n-i]*X[i];return y};
+ const stride=Math.max(1,Math.floor(ns/1200));
+ for(let k=0;k<=ns;k++){if(k%stride==0){T.push(k*dt);Y.push(out(X))}
+  const k1=f(X),k2=f(X.map((v,i)=>v+dt/2*k1[i])),k3=f(X.map((v,i)=>v+dt/2*k2[i])),k4=f(X.map((v,i)=>v+dt*k3[i]));X=X.map((v,i)=>v+dt/6*(k1[i]+2*k2[i]+2*k3[i]+k4[i]));
+  if(!isFinite(X[0])||Math.abs(X[0])>1e12)break}
+ return{T,Y,unst,den,num}}
+function stepInfo(sim,K){if(sim.unst||K==0)return null;const{T,Y,den,num}=sim,yss=num[num.length-1]/den[den.length-1];if(!isFinite(yss)||Math.abs(yss)<1e-9)return null;
+ const g=Y.map(v=>v/yss),it=(lv)=>{for(let i=1;i<g.length;i++)if(g[i]>=lv){return T[i-1]+(lv-g[i-1])/(g[i]-g[i-1])*(T[i]-T[i-1])}return NaN};
+ const tr=it(.9)-it(.1);let pk=0,pi=0;g.forEach((v,i)=>{if(v>pk){pk=v;pi=i}});let ts=NaN;for(let i=g.length-1;i>=0;i--)if(Math.abs(g[i]-1)>.02){ts=i==g.length-1?NaN:T[i+1];break}if(ts!==ts&&Math.abs(g[0]-1)<=.02)ts=0;
+ return{yss,tr,tp:T[pi],Mp:Math.max(0,(pk-1)*100),peak:pk*yss,ts}}
+function drawStep(){const K=+$('k').value,c=$('stp'),[x,W,H]=fit(c);S.sim=simulate(K);const{T,Y,unst}=S.sim;S.info=stepInfo(S.sim,K);const I=S.info;
+ const mu=css('--mu'),tx=css('--tx'),p={l:46,r:10,t:12,b:30},w=W-p.l-p.r,h=H-p.t-p.b;
+ let ymin=Math.min(0,...Y),ymax=Math.max(0.1,...Y);if(unst){ymin=Math.max(ymin,-1e4);ymax=Math.min(ymax,1e4)}const pad=(ymax-ymin)*.08;ymin-=pad;ymax+=pad;
+ const X=t=>p.l+t/T[T.length-1]*w,Yy=v=>p.t+(ymax-v)/(ymax-ymin)*h;x.clearRect(0,0,W,H);x.strokeStyle=css('--bd');x.fillStyle=mu;x.font='10px sans-serif';x.lineWidth=.5;
+ for(let i=0;i<=5;i++){const v=ymin+(ymax-ymin)*i/5,t=T[T.length-1]*i/5;x.beginPath();x.moveTo(p.l,Yy(v));x.lineTo(W-p.r,Yy(v));x.stroke();x.fillText(Math.abs(v)>=100?v.toExponential(0):f2(v,2),4,Yy(v)+3);
+  x.beginPath();x.moveTo(X(t),p.t);x.lineTo(X(t),H-p.b);x.stroke();x.fillText(f2(t,1),X(t)-6,H-16)}
+ x.fillText('Time (s)',W/2-18,H-3);if(I&&!unst){x.strokeStyle=mu;x.setLineDash([4,4]);x.beginPath();x.moveTo(p.l,Yy(I.yss));x.lineTo(W-p.r,Yy(I.yss));x.stroke();x.setLineDash([])}
+ x.strokeStyle='#0b6bcb';x.lineWidth=2;x.beginPath();let first=true;T.forEach((t,i)=>{const yy=Math.max(ymin,Math.min(ymax,Y[i]));first?x.moveTo(X(t),Yy(yy)):x.lineTo(X(t),Yy(yy));first=false});x.stroke();
+ x.font='bold 11px sans-serif';if(I){const mk=(t,l,col)=>{if(t===t&&t>=0&&t<=T[T.length-1]){x.strokeStyle=col;x.setLineDash([3,3]);x.lineWidth=1;x.beginPath();x.moveTo(X(t),p.t);x.lineTo(X(t),H-p.b);x.stroke();x.setLineDash([]);x.fillStyle=col;x.fillText(l,X(t)+3,p.t+10+(l[0]=='t'&&l[1]=='s'?24:l[0]=='M'?12:0))}};
+  mk(it0(I.tr,S.sim),'tr='+f2(I.tr)+'s','#888');if(I.Mp>.1){x.fillStyle='#e53935';x.beginPath();x.arc(X(I.tp),Yy(I.peak),4,0,7);x.fill();x.fillStyle=tx;x.fillText('Mp='+f2(I.Mp,1)+'%',X(I.tp)+6,Yy(I.peak)-4)}mk(I.ts,'ts='+f2(I.ts)+'s',css('--ac'))}
+ else if(unst){x.fillStyle=css('--bad');x.fillText('Unstable — response grows without bound',p.l+8,p.t+14)}
+ $('rtitle').textContent=unst?'Step Response (Unstable, K = '+f2(K)+')':'Closed-Loop Step Response (K = '+f2(K)+')'}
+const it0=(tr,sim)=>{const{T,Y,den,num}=sim,y=num[num.length-1]/den[den.length-1];const g=Y.map(v=>v/y);for(let i=1;i<g.length;i++)if(g[i]>=.9)return T[i];return NaN};
+/* ---------- metrics / status ---------- */
+function say(m){if($('voice').checked&&window.speechSynthesis){speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(m);speechSynthesis.speak(u)}}
+function update(){const K=+$('k').value;$('glab').textContent='Gain K: '+f2(K);if(document.activeElement!==$('kn'))$('kn').value=f2(K);
+ const cp=clp(K),uns=cp.some(z=>z[0]>1e-4),marg=!uns&&K>0&&cp.some(z=>Math.abs(z[0])<=1e-4&&Math.abs(z[1])>1e-6);
+ if(uns&&S.last){S.last=false;say('Warning! System has switched from stable to unstable at gain K equals '+f2(K)+'. Closed loop poles have crossed into the right half plane, resulting in exponential growth.')} 
+ else if(!uns&&!S.last){S.last=true;say('System has switched from unstable back to stable at gain K equals '+f2(K)+'. All poles are in the left half plane.')}
+ const st=$('stat');st.textContent=uns?'🔴 UNSTABLE (poles in RHP)':marg?'🟠 MARGINALLY STABLE (poles on jω axis)':'🟢 STABLE (all poles in LHP)';st.style.color=uns?css('--bad'):marg?'#e08600':css('--ok');
+ $('pz').innerHTML='<b>Closed-loop poles (n='+cp.length+'):</b> '+cp.map(cs).join(', ')+'<br><b>Zeros (m='+S.z.length+'):</b> '+(S.z.length?S.z.map(cs).join(', '):'none');
+ $('asy').innerHTML=S.na>0?'<b>Asymptotes</b> (n−m='+S.na+'): centroid σₐ = (Σp − Σz)/(n−m) = <b>'+f2(S.cent)+'</b>; angles θₐ = (2k+1)·180°/(n−m) = <b>'+S.ang.map(a=>f2(a,0)+'°').join(', ')+'</b>':'<b>Asymptotes:</b> none (n ≤ m)';
+ const cx=cp.filter(z=>z[1]>1e-6).sort((a,b)=>Math.abs(a[0])-Math.abs(b[0]))[0];let zt=null;
+ if(cx){const wn=Math.hypot(cx[0],cx[1]);zt=-cx[0]/wn;$('zeta').innerHTML='Damping ratio ζ: <span style="color:'+(zt<0?css('--bad'):css('--ok'))+'">'+f2(zt,3)+'</span>';$('wn').textContent='Natural freq ωₙ: '+f2(wn)+' rad/s'}
+ else{$('zeta').textContent='Damping ratio ζ: N/A (real poles only)';$('wn').textContent='Natural freq ωₙ: N/A'}
+ S.zt=zt;drawLocus();drawStep()}
+/* ---------- controls ---------- */
+function setTF(){S.last=true;if(build())update()}
+$('upd').onclick=setTF;$('tf').onchange=setTF;
+$('pre').onchange=()=>{$('tf').value=PRE[$('pre').value];setTF()};
+$('rst').onclick=()=>{$('pre').selectedIndex=0;$('tf').value=PRE[$('pre').value];S.view.zoom=1;S.log=[];renderLog();setTF()};
+$('k').oninput=()=>update();$('kn').onchange=()=>{$('k').value=Math.max(0,+$('kn').value||0);update()};
+let anim=null;$('play').onclick=()=>{if(anim){clearInterval(anim);anim=null;$('play').textContent='▶ Sweep K';return}$('play').textContent='⏸ Stop';$('k').value=0;
+ anim=setInterval(()=>{const m=+$('k').max,v=+$('k').value+m/200;if(v>=m){$('k').value=m;clearInterval(anim);anim=null;$('play').textContent='▶ Sweep K'}else $('k').value=v;update()},60)};
+const lc=$('loc');function pick(e){const r=lc.getBoundingClientRect(),M=S._M;if(!M)return;const mx=e.clientX-r.left,my=e.clientY-r.top;let bd=1e99,bk=0;
+ S.br.forEach(b=>b.forEach((z,i)=>{const d=Math.hypot(M.sx(z[0])-mx,M.sy(z[1])-my);if(d<bd){bd=d;bk=S.Ks[i]}}));if(bd<60){$('k').value=Math.min(bk,+$('k').max);update()}}
+let drag=false;lc.onmousedown=e=>{drag=true;pick(e)};addEventListener('mouseup',()=>drag=false);lc.onmousemove=e=>{if(drag)pick(e)};
+lc.addEventListener('touchstart',e=>{pick(e.touches[0])},{passive:true});lc.addEventListener('touchmove',e=>{pick(e.touches[0])},{passive:true});
+lc.addEventListener('wheel',e=>{e.preventDefault();S.view.zoom=Math.min(8,Math.max(.1,S.view.zoom*(e.deltaY>0?1.15:.87)));drawLocus()},{passive:false});
+addEventListener('resize',()=>S.p.length&&update());
+$('theme').onclick=()=>{const r=document.documentElement,d=r.dataset.theme?r.dataset.theme=='dark':matchMedia('(prefers-color-scheme:dark)').matches;r.dataset.theme=d?'light':'dark';update()};
+/* ---------- log & report ---------- */
+function snap(){const K=+$('k').value,I=S.info,cp=clp(K),u=cp.some(z=>z[0]>1e-4);return{K,st:u?'Unstable':'Stable',z:S.zt,Mp:I?I.Mp:null,ts:I&&I.ts===I.ts?I.ts:null}}
+function renderLog(){const t=$('tbl');t.innerHTML='<tr><th>#</th><th>K</th><th>Status</th><th>ζ</th><th>M<sub>p</sub></th><th>t<sub>s</sub></th></tr>'+S.log.map((r,i)=>'<tr><td>'+(i+1)+'</td><td>'+f2(r.K)+'</td><td>'+r.st+'</td><td>'+(r.z==null?'—':f2(r.z,3))+'</td><td>'+(r.Mp==null?'—':f2(r.Mp,1)+'%')+'</td><td>'+(r.ts==null?'—':f2(r.ts)+'s')+'</td></tr>').join('')}
+$('log').onclick=()=>{S.log.push(snap());renderLog()};
+const QS=['What happens to closed-loop poles as K goes 0→∞?','How do locus branches relate to the real axis?','With 3 poles and 0 zeros, how many branches go to infinity?','What does crossing the jω axis into the RHP mean physically?','How is the asymptote centroid calculated?','What is the formula for asymptote angles?','Where do branches begin (K = 0)?','Where do branches end (K → ∞)?','What are breakaway points and why do they matter?','How does increasing ζ affect overshoot?'];
+$('rep-b').onclick=()=>{const rows=(S.log.length?S.log:[snap()]);const R=$('rep');
+ R.innerHTML='<div class="np row"><button class="p" onclick="print()">🖨 Print / Save as PDF</button><button onclick="rep.classList.remove(\'on\')">✕ Close</button></div><h2 style="text-align:center;color:var(--ac)">Control Systems Laboratory – Experiment Report</h2><p style="text-align:center">Study of Root Locus, jω-Axis Instability, Asymptotic Behaviour and Transient Performance</p>'+
+ '<div class="row"><input type="text" placeholder="Student name"><input type="text" placeholder="Enrollment no."><input type="text" placeholder="Instructor"><input type="date" value="'+new Date().toISOString().slice(0,10)+'"></div>'+
+ '<div class="card"><b>Model:</b> G(s) = '+$('tf').value+'<br><b>Num:</b> '+$('num').value+' &nbsp; <b>Den:</b> '+$('den').value+'<br><b>Poles:</b> '+S.p.map(cs).join(', ')+' | <b>Zeros:</b> '+(S.z.map(cs).join(', ')||'none')+'<br>'+$('asy').innerHTML+'<br>'+$('calc').innerHTML+'</div>'+
+ '<div class="card"><b>Plots (K = '+f2($('k').value)+')</b><br><img src="'+$('loc').toDataURL()+'"> <img src="'+$('stp').toDataURL()+'"></div>'+
+ '<div class="card"><b>Observation table</b><table><tr><th>#</th><th>K</th><th>Status</th><th>ζ</th><th>Mp</th><th>ts</th></tr>'+rows.map((r,i)=>'<tr><td>'+(i+1)+'</td><td>'+f2(r.K)+'</td><td>'+r.st+'</td><td>'+(r.z==null?'—':f2(r.z,3))+'</td><td>'+(r.Mp==null?'—':f2(r.Mp,1)+'%')+'</td><td>'+(r.ts==null?'—':f2(r.ts)+'s')+'</td></tr>').join('')+'</table></div>'+
+ '<div class="card"><b>Assessment</b>'+QS.map((q,i)=>'<div class="q">Q'+(i+1)+'. '+q+'<input type="text"></div>').join('')+'</div>';R.classList.add('on');R.scrollTo(0,0)};
+window.rep=$('rep');
+$('tf').value=PRE[$('pre').value];setTF();
+</script></body></html>
